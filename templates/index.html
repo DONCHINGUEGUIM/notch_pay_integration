@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notch Pay Tester</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
+    <div class="max-w-6xl mx-auto px-4 py-6">
+        <header class="mb-6 pb-4 border-b border-slate-800">
+            <h1 class="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-500">
+                <i class="fa-solid fa-bolt mr-2"></i>Notch Pay Tester
+            </h1>
+            <p class="text-slate-400 mt-1 text-sm">Test collections and transfers</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-1 space-y-4">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                    <h2 class="text-lg font-bold mb-3 flex items-center text-emerald-400">
+                        <i class="fa-solid fa-key mr-2"></i> Keys
+                    </h2>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Public Key</label>
+                            <input type="text" id="apiKey" value="pk_test.K9KSdd2QmG82UYLpbBa2SjkptJqO53GGQJxuJWvqhBiBKfEGLj0vElN7wJrvZJs8mnDdliJ2e4lxBHwHQxL6ZHDAzWWM8XT8MQ9uJRmQ9yD4kcAc01GHlhHAAG7sH" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Private Key <span class="text-amber-400 text-[10px]">(for transfers)</span></label>
+                            <input type="text" id="privateKey" value="sk_test.IKlL3l6xvo1iWxP4hQpanF8knuUN2r06NJZwXaxXoz3iFVNfNMHsDSIUEslPyarSQhKQy959v5nbwcAhRFphTtaAFIKDb0UkSpqmpbjMP7monA2DdpKeOtiFgT5JT" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                        </div>
+                        <button onclick="testAuth()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-4 rounded-lg text-sm transition shadow-lg shadow-emerald-600/30">
+                            <i class="fa-solid fa-plug mr-1"></i> Test Auth
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center mb-2">
+                        <i class="fa-solid fa-terminal mr-2 text-emerald-400"></i> Output
+                    </h3>
+                    <pre id="outputBox" class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs font-mono text-emerald-400 overflow-x-auto min-h-[200px] max-h-[400px]">Ready...</pre>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 space-y-4">
+                <div class="flex border-b border-slate-800 space-x-4">
+                    <button onclick="switchTab('pay')" id="tab-pay" class="py-2 px-4 border-b-2 border-emerald-500 text-emerald-400 font-semibold text-sm transition">Pay Now</button>
+                    <button onclick="switchTab('transfer')" id="tab-transfer" class="py-2 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium text-sm transition">Transfer</button>
+                    <button onclick="switchTab('status')" id="tab-status" class="py-2 px-4 border-b-2 border-transparent text-slate-400 hover:text-slate-200 font-medium text-sm transition">Status</button>
+                </div>
+
+                <div id="content-pay" class="space-y-4">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                        <h2 class="text-lg font-bold mb-3 text-slate-100 flex items-center">
+                            <i class="fa-solid fa-mobile-screen text-emerald-400 mr-2"></i> Mobile Money Payment
+                        </h2>
+                        <p class="text-xs text-slate-400 mb-3">One click — initializes + sends the mobile money prompt.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Amount</label>
+                                <input type="number" id="payAmount" value="100" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Currency</label>
+                                <input type="text" id="payCurrency" value="XAF" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Phone</label>
+                                <input type="text" id="payPhone" value="670000000" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Channel</label>
+                                <select id="payChannel" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                                    <option value="cm.mtn">MTN Mobile Money (CM)</option>
+                                    <option value="cm.orange">Orange Money (CM)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="payNow()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-3 px-4 rounded-lg text-base transition shadow-lg shadow-emerald-600/30">
+                            <i class="fa-solid fa-bolt mr-1"></i> Pay Now
+                        </button>
+                    </div>
+                </div>
+
+                <div id="content-transfer" class="space-y-4 hidden">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                        <h2 class="text-lg font-bold mb-3 text-slate-100 flex items-center">
+                            <i class="fa-solid fa-hand-holding-dollar text-teal-400 mr-2"></i> Withdrawal / Transfer
+                        </h2>
+                        <p class="text-xs text-slate-400 mb-3">Requires Private Key. IP must be whitelisted in Notch Pay dashboard.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Amount</label>
+                                <input type="number" id="trAmount" value="1000" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Currency</label>
+                                <input type="text" id="trCurrency" value="XAF" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Beneficiary Name</label>
+                                <input type="text" id="trName" value="Jane Doe" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Beneficiary Phone</label>
+                                <input type="text" id="trPhone" value="670000000" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Channel</label>
+                                <select id="trChannel" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                                    <option value="cm.orange">Orange Money (CM)</option>
+                                    <option value="cm.mtn">MTN Mobile Money (CM)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="makeTransfer()" class="mt-3 w-full bg-teal-600 hover:bg-teal-500 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition shadow-lg shadow-teal-600/30">
+                            <i class="fa-solid fa-paper-plane"></i> Send Transfer
+                        </button>
+                    </div>
+                </div>
+
+                <div id="content-status" class="space-y-4 hidden">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                        <h2 class="text-lg font-bold mb-3 text-slate-100 flex items-center">
+                            <i class="fa-solid fa-magnifying-glass text-emerald-400 mr-2"></i> Check Payment Status
+                        </h2>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-300 uppercase mb-1">Reference (trx.* or REF_*)</label>
+                            <input type="text" id="statusRef" placeholder="trx.xxx or REF_xxx" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200">
+                        </div>
+                        <button onclick="checkStatus()" class="mt-3 w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition shadow-lg shadow-emerald-600/30">
+                            <i class="fa-solid fa-search"></i> Check Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getCreds() {
+            return {
+                api_key: document.getElementById('apiKey').value,
+                private_key: document.getElementById('privateKey').value
+            };
+        }
+
+        function showOutput(data) {
+            document.getElementById('outputBox').textContent = JSON.stringify(data, null, 2);
+        }
+
+        function switchTab(tab) {
+            ['pay', 'transfer', 'status'].forEach(t => {
+                document.getElementById(`content-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('border-emerald-500', 'text-emerald-400', 'font-semibold');
+                document.getElementById(`tab-${t}`).classList.add('border-transparent', 'text-slate-400', 'font-medium');
+            });
+            document.getElementById(`content-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.remove('border-transparent', 'text-slate-400', 'font-medium');
+            document.getElementById(`tab-${tab}`).classList.add('border-emerald-500', 'text-emerald-400', 'font-semibold');
+        }
+
+        async function apiCall(endpoint, payload) {
+            showOutput({ status: 'Sending request...' });
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                showOutput(data);
+                return data;
+            } catch (err) {
+                showOutput({ error: err.toString() });
+            }
+        }
+
+        function testAuth() {
+            apiCall('/api/notch/test-auth', getCreds());
+        }
+
+        function payNow() {
+            const payload = {
+                ...getCreds(),
+                amount: parseFloat(document.getElementById('payAmount').value),
+                currency: document.getElementById('payCurrency').value,
+                phone: document.getElementById('payPhone').value,
+                channel: document.getElementById('payChannel').value
+            };
+            apiCall('/api/notch/pay-now', payload);
+        }
+
+        function makeTransfer() {
+            const payload = {
+                ...getCreds(),
+                amount: parseFloat(document.getElementById('trAmount').value),
+                currency: document.getElementById('trCurrency').value,
+                beneficiary_name: document.getElementById('trName').value,
+                beneficiary_phone: document.getElementById('trPhone').value,
+                channel: document.getElementById('trChannel').value
+            };
+            apiCall('/api/notch/transfer', payload);
+        }
+
+        function checkStatus() {
+            const ref = document.getElementById('statusRef').value;
+            if (!ref) { showOutput({ error: 'Enter a reference' }); return; }
+            apiCall(`/api/notch/payment-status/${ref}`, getCreds());
+        }
+    </script>
+</body>
+</html>
